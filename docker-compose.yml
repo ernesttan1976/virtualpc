@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  virtual-desktop:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: virtual-desktop
+    ports:
+      - "22:22"    # SSH (if needed)
+      - "3389:3389" # RDP (if Avica uses it)
+      - "5901:5901" # VNC server
+      - "6901:6901" # NoVNC web interface
+    volumes:
+      - ./workspace:/home/developer/workspace
+      - ./vscode-config:/home/developer/.vscode
+      - ./projects:/home/developer/projects
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    environment:
+      - DISPLAY=:0
+      - PULSE_SERVER=unix:/run/pulse/native
+    privileged: true  # Required for full desktop environment
+    restart: unless-stopped
+    # Enable GUI applications and system services
+    security_opt:
+      - seccomp:unconfined
+    # For better performance and GUI support
+    shm_size: 2gb
+    # Network mode for better Avica connectivity
+    # network_mode: "host"  # Commented out to allow port mapping

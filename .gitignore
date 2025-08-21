@@ -1,0 +1,83 @@
+# Docker
+.dockerignore
+docker-compose.override.yml
+*.env
+
+# Container data and volumes
+workspace/
+vscode-config/
+projects/
+data/
+
+# Logs
+*.log
+logs/
+log/
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE and editor files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Build artifacts
+*.deb
+*.rpm
+*.tar.gz
+*.zip
+build/
+dist/
+
+# Node.js (if you add any)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Python (if you add any)
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+
+# Git
+.git/
+.gitignore~
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# System files
+*.pid
+*.lock
+*.socket
+
+# VNC and display files
+.vnc/
+.Xauthority
+.xsession-errors
+
+# RustDesk files
+rustdesk.deb
