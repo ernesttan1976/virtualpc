@@ -81,3 +81,6 @@ ENV/
 
 # RustDesk files
 rustdesk.deb
+
+.cache/
+home/

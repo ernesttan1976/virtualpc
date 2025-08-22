@@ -1,66 +1,66 @@
 #!/bin/bash
 
-# Create RustDesk config directory
+echo "Starting Virtual PC with GUI Desktop..."
+
+# Create RustDesk config directories
 mkdir -p ~/.config/rustdesk
 
-# Configure RustDesk with your settings
-cat > ~/.config/rustdesk/config/RustDesk.toml << EOF
-[options]
+# Use custom ID from environment variable or default
+RUSTDESK_CUSTOM_ID="${RUSTDESK_CUSTOM_ID:-123456789}"
+
+# Configure RustDesk with your settings - using proper config format
+cat > ~/.config/rustdesk/RustDesk2.toml << EOF
+id = "${RUSTDESK_CUSTOM_ID}"
 id-server = "${RUSTDESK_ID_SERVER}"
 key = "${RUSTDESK_KEY}"
 relay-server = "${RUSTDESK_ID_SERVER}"
+access-mode = 0
 enable-audio = true
 enable-file-transfer = true
-enable-remote-uac = true
-enable-remote-uac-prompt = false
-enable-remote-uac-prompt-password = false
-enable-remote-uac-prompt-username = false
-enable-remote-uac-prompt-domain = false
-enable-remote-uac-prompt-remember = false
-enable-remote-uac-prompt-elevate = false
-enable-remote-uac-prompt-allow = false
-enable-remote-uac-prompt-deny = false
-enable-remote-uac-prompt-cancel = false
-enable-remote-uac-prompt-ok = false
-enable-remote-uac-prompt-yes = false
-enable-remote-uac-prompt-no = false
-enable-remote-uac-prompt-retry = false
-enable-remote-uac-prompt-ignore = false
-enable-remote-uac-prompt-continue = false
-enable-remote-uac-prompt-skip = false
-enable-remote-uac-prompt-abort = false
-enable-remote-uac-prompt-ignore-all = false
-enable-remote-uac-prompt-allow-all = false
-enable-remote-uac-prompt-deny-all = false
-enable-remote-uac-prompt-remember-all = false
-enable-remote-uac-prompt-elevate-all = false
-enable-remote-uac-prompt-allow-all = false
-enable-remote-uac-prompt-deny-all = false
-enable-remote-uac-prompt-remember-all = false
-enable-remote-uac-prompt-elevate-all = false
-enable-remote-uac-prompt-allow-all = false
-enable-remote-uac-prompt-deny-all = false
-enable-remote-uac-prompt-remember-all = false
-enable-remote-uac-prompt-elevate-all = false
+enable-clipboard = true
+enable-keyboard = true
+allow-remote-config-modification = true
 EOF
 
-# Set up RustDesk to accept connections without password
-cat > ~/.config/rustdesk/RustDesk2.toml << EOF
+# Also create the old config format for compatibility
+cat > ~/.config/rustdesk/config/RustDesk.toml << EOF
 [options]
+id = "${RUSTDESK_CUSTOM_ID}"
+id-server = "${RUSTDESK_ID_SERVER}"
+key = "${RUSTDESK_KEY}"
+relay-server = "${RUSTDESK_ID_SERVER}"
 access-mode = 0
+enable-audio = true
+enable-file-transfer = true
+enable-clipboard = true
+enable-keyboard = true
 EOF
 
-# Start RustDesk service in the background
-rustdesk --service &
+echo "RustDesk configured with server: ${RUSTDESK_ID_SERVER}"
+echo "RustDesk ID set to: ${RUSTDESK_CUSTOM_ID}"
 
-# Start the original Xpra desktop
-exec /usr/bin/xpra start \
-    --bind-tcp=0.0.0.0:14500 \
-    --html=on \
-    --start-child="startxfce4" \
-    --exit-with-children=no \
-    --daemon=no \
-    --xvfb="/usr/bin/Xvfb +extension Composite -screen 0 1920x1080x24+32 -nolisten tcp -noreset" \
-    --pulseaudio=yes \
-    --notifications=yes \
-    --bell=yes
+# Set VNC password (you can change this)
+mkdir -p ~/.vnc
+echo "virtualpc" | vncpasswd -f > ~/.vnc/passwd 2>/dev/null || echo "vncpasswd not available, VNC will use default auth"
+chmod 600 ~/.vnc/passwd 2>/dev/null || true
+
+# Start VNC server
+echo "Starting VNC server on display :1..."
+vncserver :1 -geometry 1920x1080 -depth 24 -localhost no
+
+echo "VNC server started. Desktop accessible on port 5901"
+
+# Start RustDesk with specific configuration
+echo "Starting RustDesk..."
+export DISPLAY=:1
+
+# Start RustDesk with command line arguments to force the ID
+rustdesk --id "${RUSTDESK_CUSTOM_ID}" --server "${RUSTDESK_ID_SERVER}" &
+
+echo "RustDesk started and ready for connections"
+echo "Access methods:"
+echo "- VNC: localhost:5901"
+echo "- RustDesk ID: ${RUSTDESK_CUSTOM_ID} (server: ${RUSTDESK_ID_SERVER})"
+
+# Keep the container running
+tail -f ~/.vnc/*.log

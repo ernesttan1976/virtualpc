@@ -6,32 +6,23 @@ services:
         - REPO_URL_1=${REPO_URL_1}
         - REPO_URL_2=${REPO_URL_2}
         - GIT_TOKEN=${GIT_TOKEN}
-    container_name: xpra-desktop
-    # Security: by default, bind ONLY to localhost on the host.
-    # Access it via your WireGuard, SSH tunnel, or reverse proxy.
+    container_name: ubuntu-desktop
     ports:
-      - "127.0.0.1:14500:14500"
+      # VNC access
+      - "127.0.0.1:5901:5901"
       # RustDesk ports
-      - "127.0.0.1:21115:21115"  # RustDesk client port
-      - "127.0.0.1:21116:21116"  # RustDesk relay port
+      - "127.0.0.1:21115:21115"
+      - "127.0.0.1:21116:21116"
     environment:
       - TZ=Asia/Singapore
-      # Optional: tweak desktop scaling/clarity
-      - XPRA_DPI=120
       # RustDesk configuration
       - RUSTDESK_ID_SERVER=192.168.50.165:21116
-      - RUSTDESK_KEY=0nI9MGeTFXQ1clcKVmWSNFaitUSjFVMadzU5oGW5ZmNGJzKad0UGFzMZdDeLVmI6ISeltmIsIiI6ISawFmIsIiI6ISehxWZyJCLiYTMxEjM6UjNx4CM14CO2EjLykTMiojI0N3boJye
+      - RUSTDESK_KEY=eKx7Y31FSGZ+2F6fyXj9S7Z1QcIKbhSRZeJrW5AqSxc=
+      - RUSTDESK_CUSTOM_ID=912345678  # Change this to your preferred 9-digit ID
     shm_size: "1g"
     restart: unless-stopped
-    # Persist your home and a shared workspace
     volumes:
       - ./home:/home/dev
       - ./workspace:/home/dev/workspace
       # RustDesk configuration persistence
       - ./rustdesk-config:/home/dev/.config/rustdesk
-    # Optional NVIDIA GPU acceleration (uncomment if you have it set up)
-    # deploy:
-    #   resources:
-    #     reservations:
-    #       devices:
-    #         - capabilities: ["gpu"]
