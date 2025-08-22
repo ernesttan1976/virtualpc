@@ -43,6 +43,14 @@ RUN curl -fsSL https://dl.google.com/linux/linux_signing_key.pub \
     && apt-get update && apt-get install -y --no-install-recommends google-chrome-stable \
     && rm -rf /var/lib/apt/lists/*
 
+# ---- RustDesk Client ----
+RUN wget -O rustdesk.deb https://github.com/rustdesk/rustdesk/releases/latest/download/rustdesk-1.2.3-1-amd64.deb \
+    && apt-get update && apt-get install -y --no-install-recommends \
+    libgtk-3-0 libxcb1 libxrandr2 libxss1 libxtst6 libnss3 libcups2 libxcomposite1 libasound2 libpulse0 libdbus-1-3 \
+    && dpkg -i rustdesk.deb || apt-get install -f -y \
+    && rm rustdesk.deb \
+    && rm -rf /var/lib/apt/lists/*
+
 # Useful defaults
 RUN sudo -u ${USERNAME} dbus-uuidgen > /etc/machine-id || true
 

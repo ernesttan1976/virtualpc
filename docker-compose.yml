@@ -11,16 +11,24 @@ services:
     # Access it via your WireGuard, SSH tunnel, or reverse proxy.
     ports:
       - "127.0.0.1:14500:14500"
+      # RustDesk ports
+      - "127.0.0.1:21115:21115"  # RustDesk client port
+      - "127.0.0.1:21116:21116"  # RustDesk relay port
     environment:
       - TZ=Asia/Singapore
       # Optional: tweak desktop scaling/clarity
       - XPRA_DPI=120
+      # RustDesk configuration
+      - RUSTDESK_ID_SERVER=192.168.50.165:21116
+      - RUSTDESK_KEY=0nI9MGeTFXQ1clcKVmWSNFaitUSjFVMadzU5oGW5ZmNGJzKad0UGFzMZdDeLVmI6ISeltmIsIiI6ISawFmIsIiI6ISehxWZyJCLiYTMxEjM6UjNx4CM14CO2EjLykTMiojI0N3boJye
     shm_size: "1g"
     restart: unless-stopped
     # Persist your home and a shared workspace
     volumes:
       - ./home:/home/dev
       - ./workspace:/home/dev/workspace
+      # RustDesk configuration persistence
+      - ./rustdesk-config:/home/dev/.config/rustdesk
     # Optional NVIDIA GPU acceleration (uncomment if you have it set up)
     # deploy:
     #   resources:

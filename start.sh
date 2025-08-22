@@ -1,33 +1,66 @@
-#!/usr/bin/env bash
-set -e
+#!/bin/bash
 
-# Optional: set a DPI for crisper fonts on HiDPI screens
-: "${XPRA_DPI:=120}"
+# Create RustDesk config directory
+mkdir -p ~/.config/rustdesk
 
-# Make sure PulseAudio can run in container
-if ! pulseaudio --check 2>/dev/null; then
-  pulseaudio -D --exit-idle-time=-1 || true
-fi
+# Configure RustDesk with your settings
+cat > ~/.config/rustdesk/config/RustDesk.toml << EOF
+[options]
+id-server = "${RUSTDESK_ID_SERVER}"
+key = "${RUSTDESK_KEY}"
+relay-server = "${RUSTDESK_ID_SERVER}"
+enable-audio = true
+enable-file-transfer = true
+enable-remote-uac = true
+enable-remote-uac-prompt = false
+enable-remote-uac-prompt-password = false
+enable-remote-uac-prompt-username = false
+enable-remote-uac-prompt-domain = false
+enable-remote-uac-prompt-remember = false
+enable-remote-uac-prompt-elevate = false
+enable-remote-uac-prompt-allow = false
+enable-remote-uac-prompt-deny = false
+enable-remote-uac-prompt-cancel = false
+enable-remote-uac-prompt-ok = false
+enable-remote-uac-prompt-yes = false
+enable-remote-uac-prompt-no = false
+enable-remote-uac-prompt-retry = false
+enable-remote-uac-prompt-ignore = false
+enable-remote-uac-prompt-continue = false
+enable-remote-uac-prompt-skip = false
+enable-remote-uac-prompt-abort = false
+enable-remote-uac-prompt-ignore-all = false
+enable-remote-uac-prompt-allow-all = false
+enable-remote-uac-prompt-deny-all = false
+enable-remote-uac-prompt-remember-all = false
+enable-remote-uac-prompt-elevate-all = false
+enable-remote-uac-prompt-allow-all = false
+enable-remote-uac-prompt-deny-all = false
+enable-remote-uac-prompt-remember-all = false
+enable-remote-uac-prompt-elevate-all = false
+enable-remote-uac-prompt-allow-all = false
+enable-remote-uac-prompt-deny-all = false
+enable-remote-uac-prompt-remember-all = false
+enable-remote-uac-prompt-elevate-all = false
+EOF
 
-# Start an XFCE session via Xpra (HTML5 client on port 14500)
-# Notes:
-#  - --html=on serves the web client
-#  - --bind-tcp=0.0.0.0:14500 makes it reachable from the container network
-#  - --start launches a full desktop session (startxfce4)
-#  - We enable H.264/VP8; Xpra auto-negotiates with the browser
-xpra start :100 \
-  --daemon=no \
-  --dpy=100 \
-  --html=on \
-  --bind-tcp=0.0.0.0:14500 \
-  --encoding=auto \
-  --video-decoders=all \
-  --video-encoders=all \
-  --opengl=yes \
-  --dpi=${XPRA_DPI} \
-  --speaker=on --microphone=off \
-  --notifications=yes \
-  --exit-with-children \
-  --start="startxfce4"
+# Set up RustDesk to accept connections without password
+cat > ~/.config/rustdesk/RustDesk2.toml << EOF
+[options]
+access-mode = 0
+EOF
 
-# If xpra exits, the container stops.
+# Start RustDesk service in the background
+rustdesk --service &
+
+# Start the original Xpra desktop
+exec /usr/bin/xpra start \
+    --bind-tcp=0.0.0.0:14500 \
+    --html=on \
+    --start-child="startxfce4" \
+    --exit-with-children=no \
+    --daemon=no \
+    --xvfb="/usr/bin/Xvfb +extension Composite -screen 0 1920x1080x24+32 -nolisten tcp -noreset" \
+    --pulseaudio=yes \
+    --notifications=yes \
+    --bell=yes
